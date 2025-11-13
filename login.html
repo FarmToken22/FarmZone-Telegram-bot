@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FarmToken — Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body, div, button, h2, p, label, a {
+      user-select: none;
+    }
+    input, textarea {
+      user-select: text;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+  <div class="bg-white/80 backdrop-blur-xl shadow-lg rounded-2xl p-8 w-full max-w-md">
+    <div class="flex justify-center mb-4">
+      <img src="Logo.png" alt="FarmToken Logo" class="w-16">
+    </div>
+    <div id="msg" class="text-center mb-3"></div>
+
+    <!-- Login Form -->
+    <div id="loginForm">
+      <h2 class="text-2xl font-bold text-green-600 mb-2 text-center">Login</h2>
+      <p class="text-gray-600 text-sm mb-5 text-center">Sign in to your account</p>
+
+      <div class="mb-4">
+        <label for="loginEmail" class="text-sm font-medium text-gray-700">Email</label>
+        <input id="loginEmail" type="email" placeholder="you@example.com"
+          class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none">
+      </div>
+
+      <div class="mb-4">
+        <label for="loginPass" class="text-sm font-medium text-gray-700">Password</label>
+        <div class="relative">
+          <input id="loginPass" type="password" placeholder="••••••••"
+            class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none pr-10">
+          <button type="button" onclick="togglePassword('loginPass')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+            <svg id="loginPassIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button onclick="handleLogin()"
+        class="w-full py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition">
+        Login
+      </button>
+
+      <p class="text-xs text-gray-500 text-center mt-4 select-text">
+        By continuing, you agree to FarmToken's 
+        <a href="usage-policy.html" class="text-green-600 hover:underline">Usage Policy</a>, 
+        and acknowledge our 
+        <a href="privacy-policy.html" class="text-green-600 hover:underline">Privacy Policy</a>.
+      </p>
+
+      <div class="text-sm text-center mt-3">
+        <a onclick="showForm('signupForm')" class="text-green-700 font-semibold cursor-pointer hover:underline">Sign Up</a> |
+        <a onclick="showForm('forgotForm')" class="text-red-600 font-semibold cursor-pointer hover:underline">Forgot Password?</a>
+      </div>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="signupForm" class="hidden">
+      <h2 class="text-2xl font-bold text-green-600 mb-2 text-center">Sign Up</h2>
+      <p class="text-gray-600 text-sm mb-5 text-center">Create a new account</p>
+
+      <div class="mb-3">
+        <label for="signupName" class="text-sm font-medium text-gray-700">Name</label>
+        <input id="signupName" type="text" placeholder="Your Name"
+          class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none">
+      </div>
+
+      <div class="mb-3">
+        <label for="signupEmail" class="text-sm font-medium text-gray-700">Email</label>
+        <input id="signupEmail" type="email" placeholder="you@example.com"
+          class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none">
+      </div>
+
+      <div class="mb-3">
+        <label for="signupPass" class="text-sm font-medium text-gray-700">Password</label>
+        <div class="relative">
+          <input id="signupPass" type="password" placeholder="At least 6 characters"
+            class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none pr-10">
+          <button type="button" onclick="togglePassword('signupPass')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+            <svg id="signupPassIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="signupConfirm" class="text-sm font-medium text-gray-700">Confirm Password</label>
+        <div class="relative">
+          <input id="signupConfirm" type="password" placeholder="Confirm Password"
+            class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none pr-10">
+          <button type="button" onclick="togglePassword('signupConfirm')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+            <svg id="signupConfirmIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button onclick="handleSignup()"
+        class="w-full py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition">
+        Register
+      </button>
+
+      <p class="text-xs text-gray-500 text-center mt-4 select-text">
+        By continuing, you agree to FarmToken's 
+        <a href="usage-policy.html" class="text-green-600 hover:underline">Usage Policy</a>, 
+        and acknowledge our 
+        <a href="privacy-policy.html" class="text-green-600 hover:underline">Privacy Policy</a>.
+      </p>
+
+      <div class="text-sm text-center mt-3">
+        <a onclick="showForm('loginForm')" class="text-green-700 font-semibold cursor-pointer hover:underline">Back to Login</a>
+      </div>
+    </div>
+
+    <!-- Forgot Password Form -->
+    <div id="forgotForm" class="hidden">
+      <h2 class="text-2xl font-bold text-red-600 mb-2 text-center">Reset Password</h2>
+      <p class="text-gray-600 text-sm mb-5 text-center">Enter your email to get reset link</p>
+
+      <div class="mb-4">
+        <label for="forgotEmail" class="text-sm font-medium text-gray-700">Email</label>
+        <input id="forgotEmail" type="email" placeholder="you@example.com"
+          class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none">
+      </div>
+
+      <button onclick="generateReset()"
+        class="w-full py-2 bg-yellow-400 text-black font-semibold rounded-lg hover:bg-yellow-500 transition">
+        Send Reset Email
+      </button>
+
+      <div class="text-sm text-center mt-4">
+        <a onclick="showForm('loginForm')" class="text-green-700 font-semibold cursor-pointer hover:underline">Back to Login</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // ✅ config.js থেকে import করুন (Firebase initialization বারবার হবে না)
+    import { auth, database } from './config.js';
+    import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { ref, set } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+    // Check if user is already logged in
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = "index.html";
+      }
+    });
+
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(inputId + 'Icon');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+        `;
+      } else {
+        input.type = 'password';
+        icon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+        `;
+      }
+    }
+
+    function showMsg(text, type = "error") {
+      const msgDiv = document.getElementById("msg");
+      msgDiv.innerHTML = `<p class="${type === "error" ? "text-red-500" : "text-green-600"} text-sm select-text font-medium">${text}</p>`;
+      
+      if (type === "success") {
+        setTimeout(() => {
+          msgDiv.innerHTML = "";
+        }, 3000);
+      }
+    }
+
+    function showForm(id) {
+      ["loginForm", "signupForm", "forgotForm"].forEach(f => {
+        document.getElementById(f).classList.add("hidden");
+      });
+      document.getElementById(id).classList.remove("hidden");
+      document.getElementById("msg").innerHTML = "";
+    }
+
+    function generateRefCode() {
+      return `FT-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    }
+
+    async function handleSignup() {
+      const name = document.getElementById("signupName").value.trim();
+      const email = document.getElementById("signupEmail").value.trim().toLowerCase();
+      const pass = document.getElementById("signupPass").value;
+      const confirm = document.getElementById("signupConfirm").value;
+
+      if (!name || !email || !pass || !confirm) {
+        return showMsg("All fields are required");
+      }
+      if (pass.length < 6) {
+        return showMsg("Password must be at least 6 characters");
+      }
+      if (pass !== confirm) {
+        return showMsg("Passwords do not match");
+      }
+
+      try {
+        // Create user account
+        const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+        const uid = userCred.user.uid;
+        
+        // Generate unique referral code for new user
+        const newUserRefCode = generateRefCode();
+        
+        // Create user data - referrerUid will be null initially
+        const newUserData = {
+          name: name,
+          email: email,
+          refCode: newUserRefCode,
+          referrerUid: null,
+          hasSubmittedReferral: false,
+          balance: 0,
+          totalMined: 0,
+          referralCount: 0,
+          referralRewards: 0,
+          createdAt: Date.now(),
+          mining: {
+            isMining: false,
+            startTime: null,
+            endTime: null,
+            currentEarned: 0
+          }
+        };
+
+        await set(ref(database, "users/" + uid), newUserData);
+        console.log("New user created:", newUserData);
+
+        showMsg("Signup successful! Redirecting...", "success");
+        setTimeout(() => window.location.href = "index.html", 1500);
+      } catch (err) {
+        console.error("Signup error:", err);
+        if (err.code === "auth/email-already-in-use") {
+          showMsg("This email is already registered");
+        } else if (err.code === "auth/invalid-email") {
+          showMsg("Invalid email address format");
+        } else if (err.code === "auth/weak-password") {
+          showMsg("Password is too weak. Use at least 6 characters");
+        } else {
+          showMsg("Signup error: " + err.message);
+        }
+      }
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+      const pass = document.getElementById("loginPass").value;
+      
+      if (!email || !pass) {
+        return showMsg("Email and password are required");
+      }
+
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        showMsg("Login successful! Redirecting...", "success");
+        setTimeout(() => window.location.href = "index.html", 1500);
+      } catch (err) {
+        console.error("Login error:", err);
+        if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+          showMsg("Invalid email or password");
+        } else if (err.code === "auth/invalid-email") {
+          showMsg("Invalid email address");
+        } else {
+          showMsg("Login failed: " + err.message);
+        }
+      }
+    }
+
+    async function generateReset() {
+      const email = document.getElementById("forgotEmail").value.trim().toLowerCase();
+      
+      if (!email) {
+        return showMsg("Email is required");
+      }
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showMsg("Password reset email sent! Check your inbox.", "success");
+      } catch (err) {
+        console.error("Reset error:", err);
+        if (err.code === "auth/user-not-found") {
+          showMsg("No account found with this email");
+        } else if (err.code === "auth/invalid-email") {
+          showMsg("Invalid email address");
+        } else {
+          showMsg("Error: " + err.message);
+        }
+      }
+    }
+
+    window.handleSignup = handleSignup;
+    window.handleLogin = handleLogin;
+    window.generateReset = generateReset;
+    window.showForm = showForm;
+    window.togglePassword = togglePassword;
+  </script>
+</body>
+</html>

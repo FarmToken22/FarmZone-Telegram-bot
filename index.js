@@ -1,240 +1,183 @@
-const { Telegraf } = require('telegraf');
-const express = require('express');
+// Main Application Logic - Updated for Multiple Data Files Support
+// index.js - Version 3.0 - Support for data.js, data1.js, data2.js, etc.
 
-// Express server for health check (Render এর জন্য দরকার)
-const app = express();
-const PORT = process.env.PORT || 3000;
+(function() {
+    'use strict';
 
-// Environment variables
-const BOT_TOKEN = process.env.BOT_TOKEN;
-const WEB_APP_URL = process.env.WEB_APP_URL || 'https://farmtoken22.github.io/FarmZone-Telegram-bot/';
+    // DOM Elements
+    const messagesDiv = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const chatArea = document.getElementById('chatArea');
+    
+    // State
+    let isLoading = false;
+    let allAnswers = {};
 
-// Bot instance
-const bot = new Telegraf(BOT_TOKEN);
-
-// Express routes
-app.get('/', (req, res) => {
-  res.send('✅ FarmZone Telegram Bot is running!');
-});
-
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    bot: 'FarmZone',
-    timestamp: new Date().toISOString() 
-  });
-});
-
-// Start Express server
-app.listen(PORT, () => {
-  console.log(`🌐 Express server running on port ${PORT}`);
-});
-
-// ========================================
-// BOT COMMANDS
-// ========================================
-
-// /start command
-bot.start((ctx) => {
-  const name = ctx.from.first_name || "User";
-  const userId = ctx.from.id;
-  const username = ctx.from.username || "N/A";
-  
-  console.log(`✅ New user started bot:`);
-  console.log(`   Name: ${name}`);
-  console.log(`   ID: ${userId}`);
-  console.log(`   Username: @${username}`);
-  
-  ctx.reply(
-    `👋 Welcome *${name}*!\n\n` +
-    `🌾 *FarmZone* - Start Mining Crypto Tokens!\n\n` +
-    `✨ *Features:*\n` +
-    `💰 Mine tokens every 8 hours\n` +
-    `👥 Refer friends & earn bonuses\n` +
-    `🎁 Daily bonus rewards\n` +
-    `💎 Withdraw to your wallet\n\n` +
-    `🚀 Tap the button below to start earning!`,
-    {
-      parse_mode: "Markdown",
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "🚀 Open FarmZone App",
-              web_app: { url: WEB_APP_URL }
-            }
-          ],
-          [
-            { text: "📊 My Stats", callback_data: "stats" },
-            { text: "❓ Help", callback_data: "help" }
-          ],
-          [
-            { text: "👥 Invite Friends", callback_data: "invite" }
-          ]
-        ]
-      }
+    // Merge all data files
+    function loadAllData() {
+        // Merge data from all available files
+        if (window.FARMZONE_ANSWERS) {
+            allAnswers = { ...allAnswers, ...window.FARMZONE_ANSWERS };
+        }
+        if (window.FARMZONE_ANSWERS_1) {
+            allAnswers = { ...allAnswers, ...window.FARMZONE_ANSWERS_1 };
+        }
+        if (window.FARMZONE_ANSWERS_2) {
+            allAnswers = { ...allAnswers, ...window.FARMZONE_ANSWERS_2 };
+        }
+        
+        console.log('Total categories loaded:', Object.keys(allAnswers).length);
     }
-  );
-});
 
-// /help command
-bot.help((ctx) => {
-  ctx.reply(
-    `*📖 FarmZone Help Guide*\n\n` +
-    `*How to use:*\n` +
-    `1️⃣ Click "Open FarmZone App" button\n` +
-    `2️⃣ Login with your email\n` +
-    `3️⃣ Start mining tokens\n` +
-    `4️⃣ Claim rewards every 8 hours\n` +
-    `5️⃣ Refer friends to earn more\n\n` +
-    `*Commands:*\n` +
-    `/start - Open the app\n` +
-    `/help - Show this help\n` +
-    `/stats - View your statistics\n\n` +
-    `💡 Need support? Contact @YourSupportUsername`,
-    { parse_mode: "Markdown" }
-  );
-});
-
-// /stats command
-bot.command('stats', (ctx) => {
-  ctx.reply(
-    '📊 *Your Statistics*\n\n' +
-    'Open the FarmZone app to view your detailed stats:\n' +
-    '• Current Balance\n' +
-    '• Total Mined\n' +
-    '• Referral Count\n' +
-    '• Level Progress',
-    {
-      parse_mode: "Markdown",
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "📊 View Full Stats",
-              web_app: { url: WEB_APP_URL }
-            }
-          ]
-        ]
-      }
+    // Utility Functions
+    function scrollToBottom() {
+        chatArea.scrollTop = chatArea.scrollHeight;
     }
-  );
-});
 
-// ========================================
-// CALLBACK QUERIES (Button clicks)
-// ========================================
-
-// Stats button
-bot.action('stats', (ctx) => {
-  ctx.answerCbQuery('📊 Opening your stats...');
-  ctx.reply(
-    '📊 *Your Statistics*\n\n' +
-    'Open the app to see:\n' +
-    '• Balance & rewards\n' +
-    '• Mining progress\n' +
-    '• Referral earnings',
-    {
-      parse_mode: "Markdown",
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "🚀 Open App",
-              web_app: { url: WEB_APP_URL }
-            }
-          ]
-        ]
-      }
+    function addMessage(role, content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${role}`;
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        contentDiv.textContent = content;
+        
+        if (role === 'assistant') {
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.innerHTML = '📋 Copy';
+            copyBtn.onclick = () => copyToClipboard(content, copyBtn);
+            contentDiv.appendChild(copyBtn);
+        }
+        
+        messageDiv.appendChild(contentDiv);
+        messagesDiv.appendChild(messageDiv);
+        scrollToBottom();
     }
-  );
-});
 
-// Help button
-bot.action('help', (ctx) => {
-  ctx.answerCbQuery('❓ Showing help...');
-  ctx.reply(
-    '*❓ How to use FarmZone:*\n\n' +
-    '1️⃣ Click "Open FarmZone App"\n' +
-    '2️⃣ Login with your email\n' +
-    '3️⃣ Start mining crypto tokens\n' +
-    '4️⃣ Claim rewards every 8 hours\n' +
-    '5️⃣ Refer friends to earn bonuses\n\n' +
-    '*Tips:*\n' +
-    '• Don\'t forget to claim daily bonus\n' +
-    '• More referrals = more rewards\n' +
-    '• Level up by mining more\n\n' +
-    '💡 Need help? Contact support',
-    { parse_mode: "Markdown" }
-  );
-});
-
-// Invite button
-bot.action('invite', (ctx) => {
-  ctx.answerCbQuery('👥 Share with friends!');
-  
-  const botUsername = ctx.botInfo.username;
-  const userId = ctx.from.id;
-  const shareText = `🌾 Join me on FarmZone and start mining crypto!\n\n` +
-                   `💰 Free tokens every 8 hours\n` +
-                   `🎁 Bonus for new users\n\n` +
-                   `Start now: https://t.me/${botUsername}?start=ref_${userId}`;
-  
-  const shareUrl = `https://t.me/share/url?url=https://t.me/${botUsername}?start=ref_${userId}&text=${encodeURIComponent('🌾 Join FarmZone and start mining crypto! 💰')}`;
-  
-  ctx.reply(
-    '👥 *Invite Friends & Earn More!*\n\n' +
-    'Share your referral link:\n\n' +
-    `\`https://t.me/${botUsername}?start=ref_${userId}\`\n\n` +
-    '🎁 *Earn 5 FZ for each friend!*',
-    {
-      parse_mode: "Markdown",
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "📤 Share on Telegram",
-              url: shareUrl
-            }
-          ]
-        ]
-      }
+    function showLoading() {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'message assistant';
+        loadingDiv.id = 'loading';
+        loadingDiv.innerHTML = `
+            <div class="message-content">
+                <div class="loading">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                </div>
+            </div>
+        `;
+        messagesDiv.appendChild(loadingDiv);
+        scrollToBottom();
     }
-  );
-});
 
-// ========================================
-// ERROR HANDLING
-// ========================================
+    function hideLoading() {
+        const loading = document.getElementById('loading');
+        if (loading) loading.remove();
+    }
 
-bot.catch((err, ctx) => {
-  console.error(`❌ Error for ${ctx.updateType}:`, err);
-  ctx.reply('⚠️ An error occurred. Please try again later.');
-});
+    function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(() => {
+            button.innerHTML = '✓ Copied';
+            setTimeout(() => {
+                button.innerHTML = '📋 Copy';
+            }, 2000);
+        });
+    }
 
-// ========================================
-// LAUNCH BOT
-// ========================================
+    // Smart Search Function - searches through all data files
+    function searchKnowledge(query) {
+        // Check if data is loaded
+        if (Object.keys(allAnswers).length === 0) {
+            return 'Sorry, data is loading. Please refresh the page.';
+        }
 
-bot.launch()
-  .then(() => {
-    console.log('✅ FarmZone Telegram Bot started successfully!');
-    console.log(`🤖 Bot Username: @${bot.botInfo.username}`);
-    console.log(`🌐 Web App URL: ${WEB_APP_URL}`);
-    console.log(`📅 Started at: ${new Date().toISOString()}`);
-  })
-  .catch((err) => {
-    console.error('❌ Failed to start bot:', err);
-    process.exit(1);
-  });
+        const q = query.toLowerCase();
 
-// Graceful shutdown
-process.once('SIGINT', () => {
-  console.log('⏹️ Stopping bot (SIGINT)...');
-  bot.stop('SIGINT');
-});
+        // Check all categories
+        for (const category in allAnswers) {
+            if (category === 'default') continue; // Check default last
+            
+            const data = allAnswers[category];
+            const keywords = data.keywords;
+            
+            // Check if any keyword matches
+            for (const keyword of keywords) {
+                if (q.includes(keyword.toLowerCase())) {
+                    return data.answer;
+                }
+            }
+        }
 
-process.once('SIGTERM', () => {
-  console.log('⏹️ Stopping bot (SIGTERM)...');
-  bot.stop('SIGTERM');
-});
+        // If no keyword matches, check general category
+        if (allAnswers.general) {
+            for (const keyword of allAnswers.general.keywords) {
+                if (q.includes(keyword.toLowerCase())) {
+                    return allAnswers.general.answer;
+                }
+            }
+        }
+
+        // Finally return default answer
+        return allAnswers.default ? allAnswers.default.answer : "Sorry, I can't answer this question.";
+    }
+
+    // Main Message Handler
+    async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message || isLoading) return;
+
+        isLoading = true;
+        sendBtn.disabled = true;
+        
+        addMessage('user', message);
+        messageInput.value = '';
+        showLoading();
+
+        // Simulate AI thinking time
+        setTimeout(() => {
+            hideLoading();
+            const answer = searchKnowledge(message);
+            addMessage('assistant', answer);
+            isLoading = false;
+            sendBtn.disabled = false;
+            messageInput.focus();
+        }, 800);
+    }
+
+    // Event Listeners
+    function initializeEventListeners() {
+        sendBtn.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        messageInput.focus();
+    }
+
+    // Initialize App
+    function init() {
+        loadAllData();
+        console.log('FZ AI Chatbot initialized - Multi-file Support Mode');
+        console.log('Data files loaded:', {
+            'data.js': !!window.FARMZONE_ANSWERS,
+            'data1.js': !!window.FARMZONE_ANSWERS_1,
+            'data2.js': !!window.FARMZONE_ANSWERS_2
+        });
+        initializeEventListeners();
+    }
+
+    // Start the app when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();
